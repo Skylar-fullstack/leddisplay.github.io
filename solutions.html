@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="keywords" content="led solutions, signage systems, automation, programmable display">
+  <title>Solutions - LED Displays</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-color: #1a1a1a;
+      font-family: 'Roboto', sans-serif;
+      color: #f0f0f0;
+      margin: 0;
+    }
+
+    #outer-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      background-color: #2a2a2a;
+      border: 2px solid #444;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      font-family: 'Roboto', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ffffff;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .solution-tile {
+      background-color: #3a3a3a;
+      border: 2px solid #555;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      aspect-ratio: 1 / 1;
+      transition: transform 0.2s ease;
+    }
+
+    .solution-tile:hover {
+      transform: scale(1.03);
+    }
+
+    .solution-tile img {
+      max-width: 100%;
+      max-height: 100px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .solution-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ffcc00;
+      font-size: 1.1em;
+    }
+
+    .solution-description {
+      font-size: 0.95em;
+      color: #ccc;
+      line-height: 1.4;
+    }
+
+    .tab {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .tablink {
+      background-color: #444;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin: 0 5px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 0.95em;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .tablink:hover {
+      background-color: #666;
+    }
+
+    @media (max-width: 900px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="outer-container">
+    <h1>LED Signage and Message Center Solutions</h1>
+
+    <div class="tab">
+      <a href="index.html"><button class="tablink">Home</button></a>
+      <a href="display-details.html"><button class="tablink">Displays</button></a>
+      <a href="software.html"><button class="tablink">Software</button></a>
+      <a href="solutions.html"><button class="tablink">Solutions</button></a>
+      <a href="contact.html"><button class="tablink">Contact</button></a>
+    </div>
+
+    <div class="grid-container">
+      <!-- Repeat this tile 9 times -->
+      <div class="solution-tile">
+        <img src="scale.gif" alt="Truck Scale Weight simulation">
+        <div class="solution-title">Truck Scale Weight Display</div>
+        <div class="solution-description">A high-visibility LED display for truck weight systems. API solution along with scalable text ensures clear, readable weight data in any lighting or weather. Durable, weather-resistant, and customizable, it’s ideal for weigh stations and industrial scales.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="warehouse.gif" alt="Solution 2">
+        <div class="solution-title">Warehouse Alerts</div>
+        <div class="solution-description">Real-time integration with your warehouse system to display operational or safety alerts.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="placeholder3.png" alt="Solution 3">
+        <div class="solution-title">Factory Communication displays</div>
+        <div class="solution-description">Visual Factory...</div>
+      </div>
+      <div class="solution-tile">
+        <img src="shotclock.gif" alt="Solution 4">
+        <div class="solution-title">Shot Clocks</div>
+        <div class="solution-description">Track production metrics or display shift information directly from your machines.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="placeholder5.png" alt="Solution 5">
+        <div class="solution-title">Mass Communication</div>
+        <div class="solution-description">Full color electronic messaging boards for community announcements and upcoming events.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="fullcolor.gif" alt="Solution 6">
+        <div class="solution-title">Community Message Center</div>
+        <div class="solution-description">Programmable digital menu boards, adaptable throughout the day or season.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="placeholder7.png" alt="Solution 7">
+        <div class="solution-title">Custom Time + Text</div>
+        <div class="solution-description">Combine date/time display with alerts or announcements on the same panel.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="placeholder8.png" alt="Solution 8">
+        <div class="solution-title">Sports Scoreboards</div>
+        <div class="solution-description">Keep your fans engaged with real-time scores, timers, and player info.</div>
+      </div>
+      <div class="solution-tile">
+        <img src="placeholder9.png" alt="Solution 9">
+        <div class="solution-title">Custom API Integration</div>
+        <div class="solution-description">Hook up any display to online services, weather feeds, stock tickers, or customer data.</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

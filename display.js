@@ -1,0 +1,493 @@
+class LEDClockDisplay {
+    constructor(options = {}) {
+        // Configuration
+        this.options = {
+            container: options.container || document.body,
+            ledSize: options.ledSize || 0.85,
+            spacing: options.spacing || 1.2,
+            offColor: options.offColor || 0x100000,
+            segmentThickness: options.segmentThickness || 2,
+            digitWidth: options.digitWidth || 7,
+            digitHeight: options.digitHeight || 13,
+            digitSpacing: options.digitSpacing || 4,
+            showColon: options.showColon !== undefined ? options.showColon : true
+        };
+
+        // Three.js properties
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.leds = [];
+        this.ledStates = [];
+        this.border = null;
+        
+        // Clock properties
+        this.hours = 0;
+        this.minutes = 0;
+        this.seconds = 0;
+        this.colonBlinkState = true;
+        this.lastColonBlink = 0;
+        
+        // Color properties
+        this.digitColor = new THREE.Color(1, 0.2, 0);  // Bright orange-red
+        
+        // Digit segment definitions (7-segment display)
+        this.segments = {
+            0: [true, true, true, false, true, true, true],      // 0
+            1: [false, false, true, false, false, true, false],  // 1
+            2: [true, false, true, true, true, false, true],     // 2
+            3: [true, false, true, true, false, true, true],     // 3
+            4: [false, true, true, true, false, true, false],    // 4
+            5: [true, true, false, true, false, true, true],     // 5
+            6: [true, true, false, true, true, true, true],      // 6
+            7: [true, false, true, false, false, true, false],   // 7
+            8: [true, true, true, true, true, true, true],       // 8
+            9: [true, true, true, true, false, true, true]       // 9
+        };
+        
+        // Initialize
+        this.init();
+        this.createLEDs();
+        this.updateTime();
+        this.animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', this.onWindowResize.bind(this));
+        
+        // Update clock every second
+        setInterval(() => this.updateTime(), 1000);
+    }
+    
+    init() {
+        const containerWidth = this.options.container.clientWidth;
+        const containerHeight = this.options.container.clientHeight;
+        
+        // Create scene with a subtle gradient background
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x050505);
+        
+        // Create camera
+        this.camera = new THREE.PerspectiveCamera(
+            40, 
+            containerWidth / containerHeight, 
+            0.1, 
+            1000
+        );
+        this.updateCameraPosition();
+        
+        // Create renderer with better quality settings
+        this.renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            alpha: true,
+            powerPreference: 'high-performance'
+        });
+        this.renderer.setSize(containerWidth, containerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.options.container.appendChild(this.renderer.domElement);
+        
+        // Enhanced lighting
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        this.scene.add(ambientLight);
+        
+        // Main directional light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        directionalLight.position.set(0, 10, 15);
+        this.scene.add(directionalLight);
+        
+        // Secondary light for depth
+        const fillLight = new THREE.DirectionalLight(0xccccff, 0.4);
+        fillLight.position.set(-10, 5, 10);
+        this.scene.add(fillLight);
+        
+        // Accent light for shine
+        const accentLight = new THREE.PointLight(0xffffcc, 0.6, 30);
+        accentLight.position.set(5, -5, 5);
+        this.scene.add(accentLight);
+    }
+    
+    onWindowResize() {
+        const containerWidth = this.options.container.clientWidth;
+        const containerHeight = this.options.container.clientHeight;
+        
+        this.camera.aspect = containerWidth / containerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(containerWidth, containerHeight);
+    }
+    
+    updateCameraPosition() {
+        const { digitWidth, digitHeight, digitSpacing, spacing } = this.options;
+        
+        // Calculate total width of the 4-digit display with colon
+        const totalWidth = (digitWidth * 4 + digitSpacing * 3) * spacing;
+        const totalHeight = digitHeight * spacing;
+        
+        // Set camera position for a nice perspective view
+        this.camera.position.set(totalWidth * 0.5, totalHeight * 0.5, totalHeight * 2);
+        this.camera.lookAt(totalWidth * 0.5, totalHeight * 0.5, 0);
+    }
+    
+    createLEDs() {
+        // Clear existing LEDs
+        if (this.leds.length > 0) {
+            this.leds.forEach(led => this.scene.remove(led));
+            this.leds = [];
+        }
+        
+        // Remove existing border if any
+        if (this.border) {
+            this.scene.remove(this.border);
+            this.border = null;
+        }
+        
+        const { digitWidth, digitHeight, ledSize, spacing, offColor, digitSpacing, segmentThickness } = this.options;
+        
+        // Calculate total width and height
+        const totalWidth = (digitWidth * 4 + digitSpacing * 3) * spacing;
+        const totalHeight = digitHeight * spacing;
+        
+        // Initialize LED array
+        this.leds = [];
+        
+        // Create a 2D array to track each LED position and state
+        const totalLEDWidth = digitWidth * 4 + digitSpacing * 3;
+        const totalLEDHeight = digitHeight;
+        this.ledMatrix = Array(totalLEDHeight).fill().map(() => Array(totalLEDWidth).fill(null));
+        
+        // Enhanced LED geometry and materials for better visual quality
+        const geometry = new THREE.SphereGeometry(ledSize / 2, 16, 16);
+        const material = new THREE.MeshPhongMaterial({ 
+            color: offColor,
+            specular: 0x555555,
+            shininess: 10,
+            emissive: 0x110000,
+            emissiveIntensity: 0.2
+        });
+        
+        // Create LED matrix for the entire display
+        for (let y = 0; y < totalLEDHeight; y++) {
+            for (let x = 0; x < totalLEDWidth; x++) {
+                const led = new THREE.Mesh(geometry, material.clone());
+                
+                // Position LED
+                led.position.set(
+                    x * spacing, 
+                    (totalLEDHeight - 1 - y) * spacing, 
+                    0
+                );
+                
+                this.scene.add(led);
+                this.leds.push(led);
+                this.ledMatrix[y][x] = led;
+            }
+        }
+        
+        // Create a premium-looking backing board
+        const boardGeometry = new THREE.BoxGeometry(
+            totalWidth, 
+            totalHeight, 
+            ledSize / 3
+        );
+        
+        // More attractive brushed metal-look back panel
+        const boardMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x222222,
+            specular: 0x333333,
+            shininess: 30,
+            bumpScale: 0.02
+        });
+        
+        const board = new THREE.Mesh(boardGeometry, boardMaterial);
+        board.position.set(
+            totalWidth / 2 - spacing / 2, 
+            totalHeight / 2 - spacing / 2, 
+            -ledSize / 3
+        );
+        this.scene.add(board);
+        
+        // Add premium black encasing/border with beveled edges
+        const borderThickness = spacing * 1.2;
+        const borderDepth = ledSize * 2;
+        
+        // Create each edge of the border with beveled corners for a premium look
+        // Top edge with bevel
+        const topEdgeGeometry = new THREE.BoxGeometry(totalWidth, borderThickness, borderDepth);
+        const topEdge = new THREE.Mesh(topEdgeGeometry, this.createBorderMaterial());
+        topEdge.position.set(
+            totalWidth / 2 - spacing / 2,
+            totalHeight + borderThickness/2 - spacing / 2,
+            -ledSize / 3
+        );
+        
+        // Bottom edge with bevel
+        const bottomEdgeGeometry = new THREE.BoxGeometry(totalWidth, borderThickness, borderDepth);
+        const bottomEdge = new THREE.Mesh(bottomEdgeGeometry, this.createBorderMaterial());
+        bottomEdge.position.set(
+            totalWidth / 2 - spacing / 2,
+            -borderThickness/2 - spacing / 2,
+            -ledSize / 3
+        );
+        
+        // Left edge with bevel
+        const leftEdgeGeometry = new THREE.BoxGeometry(borderThickness, totalHeight, borderDepth);
+        const leftEdge = new THREE.Mesh(leftEdgeGeometry, this.createBorderMaterial());
+        leftEdge.position.set(
+            -borderThickness/2 - spacing / 2,
+            totalHeight / 2 - spacing / 2,
+            -ledSize / 3
+        );
+        
+        // Right edge with bevel
+        const rightEdgeGeometry = new THREE.BoxGeometry(borderThickness, totalHeight, borderDepth);
+        const rightEdge = new THREE.Mesh(rightEdgeGeometry, this.createBorderMaterial());
+        rightEdge.position.set(
+            totalWidth + borderThickness/2 - spacing / 2,
+            totalHeight / 2 - spacing / 2,
+            -ledSize / 3
+        );
+        
+        // Group all edges
+        this.border = new THREE.Group();
+        this.border.add(topEdge);
+        this.border.add(bottomEdge);
+        this.border.add(leftEdge);
+        this.border.add(rightEdge);
+        
+        this.scene.add(this.border);
+    }
+    
+    createBorderMaterial() {
+        // Premium glossy black finish for the border
+        return new THREE.MeshPhongMaterial({ 
+            color: 0x0a0a0a,
+            specular: 0x333333,
+            shininess: 30,
+            reflectivity: 0.5
+        });
+    }
+    
+    drawDigit(digit, position) {
+        const { digitWidth, digitHeight, segmentThickness } = this.options;
+        const offsetX = position * (digitWidth + this.options.digitSpacing);
+        
+        // Get the segment configuration for this digit
+        const segments = this.segments[digit];
+        
+        // Clear all LEDs in this digit position first
+        this.clearDigitArea(position);
+        
+        // Draw each segment if it's active
+        if (segments[0]) this.drawHorizontalSegment(0, offsetX, 0);                           // Top
+        if (segments[1]) this.drawVerticalSegment(0, offsetX, 0);                             // Top Left
+        if (segments[2]) this.drawVerticalSegment(0, offsetX + digitWidth - segmentThickness, 0); // Top Right
+        if (segments[3]) this.drawHorizontalSegment(0, offsetX, Math.floor(digitHeight/2));   // Middle
+        if (segments[4]) this.drawVerticalSegment(Math.floor(digitHeight/2), offsetX, 0);     // Bottom Left
+        if (segments[5]) this.drawVerticalSegment(Math.floor(digitHeight/2), offsetX + digitWidth - segmentThickness, 0); // Bottom Right
+        if (segments[6]) this.drawHorizontalSegment(0, offsetX, digitHeight - segmentThickness); // Bottom
+    }
+    
+    drawHorizontalSegment(startY, startX, y) {
+        const { digitWidth, segmentThickness } = this.options;
+        
+        for (let i = 0; i < digitWidth; i++) {
+            for (let j = 0; j < segmentThickness; j++) {
+                if (y + j < this.ledMatrix.length && startX + i < this.ledMatrix[0].length) {
+                    const led = this.ledMatrix[y + j][startX + i];
+                    if (led) {
+                        led.material.color = this.digitColor;
+                        led.material.emissive = this.digitColor.clone();
+                        led.material.emissiveIntensity = 0.7;
+                    }
+                }
+            }
+        }
+    }
+    
+    drawVerticalSegment(startY, startX, offsetY) {
+        const { digitHeight, segmentThickness } = this.options;
+        const segmentHeight = Math.floor(digitHeight / 2);
+        
+        for (let i = 0; i < segmentThickness; i++) {
+            for (let j = 0; j < segmentHeight; j++) {
+                if (startY + j + offsetY < this.ledMatrix.length && startX + i < this.ledMatrix[0].length) {
+                    const led = this.ledMatrix[startY + j + offsetY][startX + i];
+                    if (led) {
+                        led.material.color = this.digitColor;
+                        led.material.emissive = this.digitColor.clone();
+                        led.material.emissiveIntensity = 0.7;
+                    }
+                }
+            }
+        }
+    }
+    
+    clearDigitArea(position) {
+        const { digitWidth, digitHeight, offColor } = this.options;
+        const offsetX = position * (digitWidth + this.options.digitSpacing);
+        
+        for (let y = 0; y < digitHeight; y++) {
+            for (let x = 0; x < digitWidth; x++) {
+                if (y < this.ledMatrix.length && offsetX + x < this.ledMatrix[0].length) {
+                    const led = this.ledMatrix[y][offsetX + x];
+                    if (led) {
+                        led.material.color = new THREE.Color(offColor);
+                        led.material.emissive = new THREE.Color(offColor);
+                        led.material.emissiveIntensity = 0.1;
+                    }
+                }
+            }
+        }
+    }
+    
+    drawColon() {
+        const { digitWidth, digitSpacing, digitHeight } = this.options;
+        const offsetX = digitWidth * 2 + digitSpacing;
+        
+        // Clear colon area first
+        for (let y = 0; y < digitHeight; y++) {
+            for (let x = 0; x < digitSpacing; x++) {
+                if (y < this.ledMatrix.length && offsetX + x < this.ledMatrix[0].length) {
+                    const led = this.ledMatrix[y][offsetX + x];
+                    if (led) {
+                        led.material.color = new THREE.Color(this.options.offColor);
+                        led.material.emissive = new THREE.Color(this.options.offColor);
+                        led.material.emissiveIntensity = 0.1;
+                    }
+                }
+            }
+        }
+        
+        // Draw colon only if it should be shown and blinking state is on
+        if (this.options.showColon && this.colonBlinkState) {
+            // Upper dot
+            const upperDotY = Math.floor(digitHeight * 0.3);
+            const lowerDotY = Math.floor(digitHeight * 0.7);
+            
+            for (let dotSize = 0; dotSize < 2; dotSize++) {
+                // Upper dot
+                if (upperDotY < this.ledMatrix.length && offsetX + Math.floor(digitSpacing/2) - 1 + dotSize < this.ledMatrix[0].length) {
+                    const led = this.ledMatrix[upperDotY][offsetX + Math.floor(digitSpacing/2) - 1 + dotSize];
+                    if (led) {
+                        led.material.color = this.digitColor;
+                        led.material.emissive = this.digitColor.clone();
+                        led.material.emissiveIntensity = 0.7;
+                    }
+                }
+                
+                // Lower dot
+                if (lowerDotY < this.ledMatrix.length && offsetX + Math.floor(digitSpacing/2) - 1 + dotSize < this.ledMatrix[0].length) {
+                    const led = this.ledMatrix[lowerDotY][offsetX + Math.floor(digitSpacing/2) - 1 + dotSize];
+                    if (led) {
+                        led.material.color = this.digitColor;
+                        led.material.emissive = this.digitColor.clone();
+                        led.material.emissiveIntensity = 0.7;
+                    }
+                }
+            }
+        }
+    }
+    
+    updateTime() {
+        const now = new Date();
+        this.hours = now.getHours();
+        this.minutes = now.getMinutes();
+        this.seconds = now.getSeconds();
+        
+        // Blink colon every second
+        if (now.getTime() - this.lastColonBlink >= 1000) {
+            this.colonBlinkState = !this.colonBlinkState;
+            this.lastColonBlink = now.getTime();
+        }
+        
+        // Update display
+        const h1 = Math.floor(this.hours / 10);
+        const h2 = this.hours % 10;
+        const m1 = Math.floor(this.minutes / 10);
+        const m2 = this.minutes % 10;
+        
+        this.drawDigit(h1, 0);
+        this.drawDigit(h2, 1);
+        this.drawColon();
+        this.drawDigit(m1, 2);
+        this.drawDigit(m2, 3);
+    }
+    
+    animate() {
+        requestAnimationFrame(this.animate.bind(this));
+        
+        // Subtle movement for the perspective view
+        if (this.border) {
+            this.border.rotation.y = Math.sin(Date.now() * 0.0002) * 0.03;
+            this.border.rotation.x = Math.sin(Date.now() * 0.0003) * 0.01;
+        }
+        
+        this.renderer.render(this.scene, this.camera);
+    }
+    
+    // Public method to set color
+    setColor(hexColor) {
+        this.digitColor = new THREE.Color(hexColor);
+        // Update the display immediately
+        this.updateTime();
+    }
+    
+    // Method to toggle 12/24 hour format
+    toggleTimeFormat() {
+        this.use24Hour = !this.use24Hour;
+        this.updateTime();
+    }
+}
+
+// Initialize the LED clock display
+function initLEDClock(containerId, options = {}) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error('Container not found');
+        return null;
+    }
+    
+    // Create the LED clock display
+    const clockDisplay = new LEDClockDisplay({
+        container,
+        ...options
+    });
+    
+    // Add color picker UI for customization
+    const colorPicker = document.createElement('div');
+    colorPicker.style.position = 'absolute';
+    colorPicker.style.bottom = '20px';
+    colorPicker.style.left = '50%';
+    colorPicker.style.transform = 'translateX(-50%)';
+    colorPicker.style.display = 'flex';
+    colorPicker.style.gap = '10px';
+    colorPicker.style.zIndex = '1000';
+    
+    // Define some nice colors for the clock
+    const colors = [
+        { name: 'Red', value: '#ff3000' },
+        { name: 'Green', value: '#00ff00' },
+        { name: 'Blue', value: '#0000ff' },
+        { name: 'Yellow', value: '#ffff00' },
+        { name: 'Purple', value: '#800080' }
+    ];
+    
+    colors.forEach(color => {
+        const button = document.createElement('button');
+        button.style.width = '30px';
+        button.style.height = '30px';
+        button.style.borderRadius = '50%';
+        button.style.backgroundColor = color.value;
+        button.style.border = '2px solid #333';
+        button.style.cursor = 'pointer';
+        button.title = color.name;
+        
+        button.addEventListener('click', () => {
+            clockDisplay.setColor(color.value);
+        });
+        
+        colorPicker.appendChild(button);
+    });
+    
+    document.body.appendChild(colorPicker);
+    
+    return clockDisplay;
+}

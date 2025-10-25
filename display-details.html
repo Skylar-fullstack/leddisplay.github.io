@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="keywords" content="led display, display details, product specs, programmable led, signage, full color">
+  <title>Display Details</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="main-content">
+    <h1>Display Details</h1>
+
+    <!-- Display container details -->
+    <div id="display-container" style="height: 250px;"></div>
+
+    <div class="tab">
+      <a href="index.html">
+        <button class="tablink">Back to Home</button>
+      </a>
+    </div>
+
+    <p class="description">
+      Our LED display panels are designed for high visibility in every environment. 
+      Here, you can customize the settings for your display, such as adjusting the brightness, scrolling speed, and message content. 
+      Whether used indoors or outdoors, our displays offer seamless integration with multiple control systems.
+    </p>
+
+    <h2>Display Types</h2>
+
+    <!-- Display Types in a Horizontal Layout -->
+    <div class="display-types">
+      <!-- Full Color LED Section -->
+      <section class="display-type">
+        <h3>Full Color LED</h3>
+        <img src="tricolor.png" alt="Full Color LED Display" class="display-image">
+        <p>
+          Full color LED displays provide vibrant, high-resolution graphics and text. They are perfect for advertising, event promotions, and public signage. The displays can show rich, dynamic content in a variety of environments, including high ambient light areas.
+        </p>
+      </section>
+
+      <!-- Single Line Message Board Section -->
+      <section class="display-type">
+        <h3>Single Line Message Board</h3>
+        <img src="singleline.png" alt="Single Line Message Board" class="display-image">
+        <p>
+          Single line message boards are ideal for displaying scrolling text messages in a compact format. These displays are commonly used for real-time notifications, alerts, or simple announcements in businesses, schools, and public spaces.
+        </p>
+      </section>
+
+      <!-- Clocks/Counters Section -->
+      <section class="display-type">
+        <h3>Clocks/Counters</h3>
+        <img src="counter.png" alt="Clocks and Counters" class="display-image">
+        <p>
+          LED clocks and counters are reliable tools for tracking time, events, or counting down to specific moments. Perfect for industrial settings, countdowns for events, or showing precise time in offices, lobbies, and public spaces.
+        </p>
+      </section>
+    </div>
+
+    <!-- Specifications and Features -->
+    <h2>Specifications</h2>
+    <ul>
+      <li><strong>Panel Size:</strong> 72x24</li>
+      <li><strong>Pixel Pitch:</strong> 0.65</li>
+      <li><strong>Brightness:</strong> 4000 nits</li>
+      <li><strong>Color:</strong> Full RGB</li>
+      <li><strong>Control Interface:</strong> USB, Ethernet, RS232</li>
+    </ul>
+
+    <h2>Features</h2>
+    <ul>
+      <li>High contrast for bright environments</li>
+      <li>Remote control and scheduling support</li>
+      <li>Easy setup and maintenance</li>
+      <li>Weather-resistant for outdoor use</li>
+    </ul>
+
+  </div> <!-- End main-content -->
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="led-banner.js"></script>
+  <script src="display.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize LED Clock (for Display Details page)
+      initLEDClock('display-container', {
+        ledSize: 0.9,
+        spacing: 1.1,
+        segmentThickness: 3,
+        digitWidth: 10,
+        digitHeight: 15,
+        digitSpacing: 3,
+        showColon: true
+      });
+    });
+  </script>
+
+</body>
+</html>

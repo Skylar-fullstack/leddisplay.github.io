@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="pid, led, electronic led, electronic led sign, electronic display sign, led message sign, full color indoor, outdoor led sign, sign, signs, led sign, led signs, adaptive micro system, alpha american programmable signs, optec led displays, i-brite window displays, eclipse, excite, Full Color displays, moving message display, industrial led, industrial led sign, andon, electromatic, electro-matic, ezautomation">
+    <title>LED Banner and Clock Display</title>
+    <!-- Google Fonts for Press Start 2P -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Outer border styling with dark gray -->
+    <div id="outer-container">
+        <!-- GIF at the top left with margin -->
+        <img src="output.gif" alt="Output GIF" style="margin-left: 20px;">
+
+        <!-- LED banner -->
+        <div id="led-container"></div>
+
+        <!-- Tab button group -->
+        <div class="tab">
+            <a href="display-details.html"><button class="tablink">Products</button></a>
+            <a href="software.html"><button class="tablink">Software Docs</button></a>
+            <a href="solutions.html"><button class="tablink">Solutions</button></a> <!-- Added Solutions tab -->
+            <a href="contact.html"><button class="tablink">Contact</button></a> <!-- Added Contact tab -->
+        </div>
+
+        <!-- Description paragraph -->
+		<h2> Programmable Sign Solutions </h2>
+        <p class="description">LED signage solutions designed for reliability and ease of use, offering high-quality displays for Mass Notification Systems, real-time status updates, and automation. With years of experience, we provide solutions that integrate seamlessly with PLCs, scale systems, and work across Windows, macOS, and Linux platforms. Our full-color displays offer vibrant, easy-to-read messaging, ensuring clear communication in any setting with minimal setup and maintenance.</p>
+		
+		<h1> Demo our free software and RestAPI </h1>
+		<div style="text-align: center; margin: 60px 0;">
+		  <a href="demo.html">
+			<button style="
+			  font-family: 'Segoe UI', sans-serif;
+			  background-color: #0b0;
+			  color: #fff;
+			  font-size: 1.4rem;
+			  font-weight: bold;
+			  padding: 20px 50px;
+			  border: none;
+			  border-radius: 6px;
+			  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+			  text-transform: uppercase;
+			  letter-spacing: 1px;
+			  cursor: pointer;
+			  transition: background-color 0.2s, transform 0.15s;
+			"
+			onmouseover="this.style.backgroundColor='#090'; this.style.transform='scale(1.03)'"
+			onmouseout="this.style.backgroundColor='#0b0'; this.style.transform='scale(1)'">
+			  Demo Software
+			</button>
+		  </a>
+		</div>
+		
+		<h2> Build and Get a Quote! </h2>
+		<div style="text-align: center; margin: 60px 0;">
+		  <a href="inquiry.html">
+			<button style="
+			  font-family: 'Segoe UI', sans-serif;
+			  background-color: #0b0;
+			  color: #fff;
+			  font-size: 1.4rem;
+			  font-weight: bold;
+			  padding: 20px 50px;
+			  border: none;
+			  border-radius: 6px;
+			  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+			  text-transform: uppercase;
+			  letter-spacing: 1px;
+			  cursor: pointer;
+			  transition: background-color 0.2s, transform 0.15s;
+			"
+			onmouseover="this.style.backgroundColor='#090'; this.style.transform='scale(1.03)'"
+			onmouseout="this.style.backgroundColor='#0b0'; this.style.transform='scale(1)'">
+			  Build your Solution
+			</button>
+		  </a>
+		</div>
+
+		
+    </div> <!-- end of outer-container -->
+
+    <!-- Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="led-banner.js"></script>
+    <script src="display.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize LED Banner
+            initLEDBanner('led-container', {
+                text: "   NAME.COM           SYSTEM: OK       TRUCK WEIGHT: 36000LB        NOW OPEN        TANK 1 = 240G",
+                panelWidth: 72,
+                panelHeight: 24,
+                ledSize: 0.65,
+                spacing: 1,
+                scrollSpeed: 0.26
+            });
+        });
+    </script>
+	
+	
+</body>
+
+<!-- Footer Section -->
+<footer id="footer">
+    <div class="footer-content">
+        <p>&copy; 2025 Lumiron. All rights reserved.</p>
+        <p>Contact us at: <a href="mailto:info@lumiron.com">info@lumiron.com</a></p>
+    </div>
+    <div class="footer-social">
+        <!-- You can add social media icons here if needed -->
+        <a href="https://facebook.com/skylarbiz" target="_blank"><img src="facebook-icon.png" alt="Facebook"></a>
+        <a href="https://twitter.com/skylarbiz" target="_blank"><img src="twitter-icon.png" alt="Twitter"></a>
+        <a href="https://linkedin.com/company/skylarbiz" target="_blank"><img src="linkedin-icon.png" alt="LinkedIn"></a>
+    </div>
+</footer>
+
+
+</html>
